@@ -44,7 +44,9 @@ namespace TIMES_Downloader
         private Boolean loaded = false; //used by webbrowser control
         private Thread thread;
 
-        public MainForm()
+		Boolean killThread = false;
+
+		public MainForm()
         {
             InitializeComponent();
         }
@@ -52,8 +54,12 @@ namespace TIMES_Downloader
         private void Form1_Load(object sender, EventArgs e)
         {
             webBrowser1.ScriptErrorsSuppressed = true;
+			btnRefresh.Enabled = false;
             btnDownload.Enabled = false;
-            btnLogin.Enabled = true;
+			btnRefreshStop.Enabled = false;
+			btnSaveLoc.Enabled = false;
+			btnLogin.Enabled = true;
+			
 
             License l = new License();
             l.ShowDialog();
@@ -74,7 +80,8 @@ namespace TIMES_Downloader
             if (Login(username.Text, password.Text))
             {
                 toolStripProgressBar1.Value = 0;
-                btnDownload.Enabled = true;
+				btnSaveLoc.Enabled = true;
+				btnDownload.Enabled = true;
                 btnLogin.Enabled = false;
             }
             else
@@ -108,11 +115,13 @@ namespace TIMES_Downloader
 
             if (Directory.Exists(folderPath + "\\download"))
             {
-                MessageBox.Show("The program found old files in the folder you chose. This program can't resume downloads");
-                
+                MessageBox.Show("The program found old files in the folder you chose. To resume downloads or update click the Update button.");
+				btnRefresh.Enabled = true;
             }
+			else
+				btnRefresh.Enabled = false;
 
-            saveLoc.Text = folderPath;
+			saveLoc.Text = folderPath;
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
@@ -138,6 +147,65 @@ namespace TIMES_Downloader
             btnDownload.Enabled = true;
             btnPDF.Enabled = true;
         }
+
+		private void btnRefresh_Click(object sender, EventArgs e)
+		{
+			btnDownload.Enabled = false;
+			btnLogin.Enabled = false;
+			btnPDF.Enabled = false;
+			btnRefresh.Enabled = false;
+			btnSaveLoc.Enabled = false;
+			btnRefreshStop.Enabled = true;
+			killThread = false;
+
+			string saveLocation = saveLoc.Text + "\\download\\";
+			string[] courses = Directory.GetDirectories(saveLocation);
+
+			string url = "https://times.taylors.edu.my/course/view.php?id=";
+			
+			foreach (var course in courses)
+			{
+				if (killThread)
+					continue;
+
+				string courseID = Path.GetFileName(course).Split('-').Last().Trim();
+
+				if(courseID == null)
+				{
+					error += "Skipping directory " + course + " as couldn't find courseID \r\n";
+					continue;
+				}
+
+				Boolean result = RefreshFiles(url + courseID, course);
+				if(!result)
+					error += "Error updating course " + url + courseID + "  Make sure you still have access to the course. \r\n";
+
+			}
+
+			btnDownload.Enabled = true;
+			btnLogin.Enabled = true;
+			btnPDF.Enabled = true;
+			btnRefresh.Enabled = true;
+			btnSaveLoc.Enabled = true;
+			btnRefreshStop.Enabled = false;
+			killThread = false;
+
+			toolStripProgressBar1.Value = 0;
+			toolStripLabel1.Text = "All files updated.";
+		}
+
+		private void btnRefreshStop_Click(object sender, EventArgs e)
+		{
+			DialogResult dialogResult = MessageBox.Show("Are you sure? Click No to continue downloading.", "Stop?", MessageBoxButtons.YesNo);
+			if (dialogResult == DialogResult.Yes)
+			{
+				killThread = true;
+			}
+			else
+			{
+				
+			}
+		}
 
         private void btnBrowser_Click(object sender, EventArgs e)
         {
@@ -184,7 +252,7 @@ namespace TIMES_Downloader
             toPDF.ShowDialog();
         }
 
-        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("http://thetechterminus.com");
         }
@@ -195,7 +263,7 @@ namespace TIMES_Downloader
             MessageBox.Show("Saved file to" + saveLoc.Text + "\\" + "error.log .");
         }
 
-        public Boolean Login(string username, string password)
+		private Boolean Login(string username, string password)
         {
             toolStripLabel1.Text = "Logging in... WAIT";
             toolStripProgressBar1.Value = 5;
@@ -203,7 +271,7 @@ namespace TIMES_Downloader
             GetBodyFromURL("https://times.taylors.edu.my/login/index.php");
 
             toolStripProgressBar1.Value = 25;
-            toolStripLabel1.Text = "Page laoded. Logging in";
+            toolStripLabel1.Text = "Page loaded. Logging in";
 
             webBrowser1.Document.GetElementById("username").SetAttribute("value", username);
             webBrowser1.Document.GetElementById("password").SetAttribute("value", password);
@@ -217,7 +285,7 @@ namespace TIMES_Downloader
             loaded = false;
             LoadPage();
 
-            toolStripLabel1.Text = "Page laoded.";
+            toolStripLabel1.Text = "Page loaded.";
             toolStripProgressBar1.Value = 99;
 
             return !(webBrowser1.Document.Body.InnerHtml.Contains("Forgotten your username or password?"));
@@ -226,8 +294,7 @@ namespace TIMES_Downloader
         private String GetBodyFromURL(string URL)
         {
             loaded = false;
-            webBrowser1.Navigate(URL);
-            toolStripLabel1.Text = "Navigated to - " + URL;
+            webBrowser1.Navigate(URL);   
             LoadPage();
             return webBrowser1.Document.Body.InnerHtml;
         }
@@ -241,9 +308,9 @@ namespace TIMES_Downloader
             return true;
         }
 
-        public Boolean DownloadFiles()
+		private Boolean DownloadFiles()
         {
-            String saveLocation = saveLoc.Text;
+			String saveLocation = saveLoc.Text;
             string folderName = "";
       
             List<DownloadItem> downloadItems = new List<DownloadItem>();
@@ -309,7 +376,8 @@ namespace TIMES_Downloader
                             {
                                 downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
                                 RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
-                            }
+							
+							}
 
                         }
                     }
@@ -324,7 +392,11 @@ namespace TIMES_Downloader
 
             var incrementProgress = 65 / downloadItems.Count;
             string cookies = GetCookies();
+			string path = saveLocation + "\\download\\" + folderName;
 
+			string historyFile = path +  "\\.download_history";
+
+			List<string> history = new List<string>();
             thread = new Thread(() =>
             {
                 foreach (var dlItem in downloadItems)
@@ -337,8 +409,9 @@ namespace TIMES_Downloader
                     {
                         richTextBox2.AppendText("Downloading file: " + dlItem.name + "\r\n");
                     });
-                    //getBodyFromURL(dlItem.url);
-                    DownloadInit(dlItem, cookies, saveLocation, folderName);
+					//getBodyFromURL(dlItem.url);
+					history.Add(dlItem.folder + "\\" + dlItem.name);
+                    DownloadInit(dlItem, cookies, path);
                 }
             });
             thread.IsBackground = true;
@@ -349,10 +422,149 @@ namespace TIMES_Downloader
                 Application.DoEvents();
             }
 
-            toolStripProgressBar1.Value = 0;
+			using (TextWriter tw = new StreamWriter(historyFile))
+			{
+				foreach (String s in history)
+					tw.WriteLine(s);
+			}
+
+			toolStripProgressBar1.Value = 0;
             toolStripLabel1.Text = "Completed. Saved to: " +  saveLocation + "\\download\\" + folderName;
             return true;
         }
+
+		//TODO: Merge DownloadFiles() and RefreshFiles() into one function.
+		private Boolean RefreshFiles(string URL, string saveLocation)
+		{
+
+			if (killThread)
+				return false;
+
+			List<DownloadItem> downloadItems = new List<DownloadItem>();
+
+			toolStripLabel1.Text = "Loading... WAIT";
+			toolStripProgressBar1.Value = 5;
+
+			string body = GetBodyFromURL(URL);
+			File.WriteAllText(saveLoc.Text + "/temp.html", body);
+			if (!body.Contains("Your progress"))
+				return false;
+
+			var doc = new HtmlAgilityPack.HtmlDocument();
+			doc.Load(saveLoc.Text + "/temp.html");
+
+			toolStripProgressBar1.Value = 25;
+			toolStripLabel1.Text = "Page loaded. Fetching url";
+
+			foreach (var div in doc.DocumentNode.SelectNodes("//div[@class='page-header-headings']"))
+			{
+				//folderName = div.InnerText.Trim(); //TODO change folder name if the course name has changed.
+			}
+
+			if (doc.DocumentNode.SelectNodes("//ul[@class='topics']") == null)
+			{
+				error += "Course not supported anymore. " + URL + " \r\n";
+				return false;
+			}
+
+			foreach (var div in doc.DocumentNode.SelectNodes("//ul[@class='topics']"))
+			{
+				foreach (var section in div.Elements("li"))
+				{
+					foreach (var itemLi in section.Descendants("li"))
+					{
+						foreach (var itemLink in itemLi.Descendants("a"))
+						{
+							if (!itemLink.GetAttributeValue("href", "nolink").Contains("resource/view.php?id"))
+							{
+								error += "Skipping Link: " + itemLink.GetAttributeValue("href", "nolink") + "\r\n";
+								continue;
+							}
+
+							if (itemLink.Element("span").HasClass("instancename"))
+							{
+								downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
+								RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
+							}
+
+						}
+					}
+				}
+			}
+
+			if (downloadItems.Count < 1)
+				return false;
+
+			toolStripProgressBar1.Value = 35;
+			toolStripLabel1.Text = "All links fetched... Now downloading... This may take a while...";
+
+			var incrementProgress = 65 / downloadItems.Count;
+			string cookies = GetCookies();
+
+			
+			string historyFile = saveLocation + "\\.download_history";
+			string[] history = null;
+			Boolean validHistory = true;
+
+			if (File.Exists(historyFile))
+				 history = File.ReadAllLines(historyFile);
+			else
+				validHistory = false;
+
+			List<string> newHistory = new List<string>();
+
+			if (validHistory && !(history.Length > 0))
+				validHistory = false;
+
+			thread = new Thread(() =>
+			{
+				foreach (var dlItem in downloadItems)
+				{
+					if (killThread)
+						continue;
+
+					this.Invoke((MethodInvoker)delegate
+					{
+						toolStripProgressBar1.Value += incrementProgress;
+					});
+					
+					newHistory.Add(dlItem.folder + "\\" + dlItem.name);
+
+					if (validHistory)
+					{
+						var index = Array.FindIndex(history, x => x == (dlItem.folder + "\\" + dlItem.name));
+						if (index > -1)
+						{
+							continue; // file already downloaded
+						}
+					}
+
+					this.Invoke((MethodInvoker)delegate
+					{
+						richTextBox2.AppendText("Downloading file: " + dlItem.name + "\r\n");
+					});
+
+
+					//getBodyFromURL(dlItem.url);
+					DownloadInit(dlItem, cookies, saveLocation);
+				}
+			});
+			thread.IsBackground = true;
+			thread.Start();
+
+			while (thread.IsAlive)
+			{
+				Application.DoEvents();
+			}
+
+			using (TextWriter tw = new StreamWriter(historyFile))
+			{
+				foreach (String s in newHistory)
+					tw.WriteLine(s);
+			}
+
+			return true;
+		}
 
         private string GetCookies()
         {
@@ -366,7 +578,7 @@ namespace TIMES_Downloader
             }
         }
 
-        private Boolean DownloadInit(DownloadItem item, string cookies, string saveLocation, string title)
+        private Boolean DownloadInit(DownloadItem item, string cookies, string saveLocation)
         {
             string tempNameHolder = "none";
             try
@@ -394,7 +606,7 @@ namespace TIMES_Downloader
                     error += "File Name was empty. Renamed File to: " + fileName + " Check extension. \r\n";
                 }
 
-                string path = saveLocation + "\\download\\" + title + "\\" + GetSafeFilename(item.folder) + "\\";
+                string path = saveLocation + "\\" + GetSafeFilename(item.folder) + "\\";
                 fileName = GetSafeFilename(fileName);
                 tempNameHolder = path + fileName;
 
@@ -402,7 +614,6 @@ namespace TIMES_Downloader
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
-               
                 File.Move(tmpFile, path + fileName);
                 return true;
             }
@@ -422,5 +633,6 @@ namespace TIMES_Downloader
             }
             return filename;
         }
-    }
+
+	}
 }

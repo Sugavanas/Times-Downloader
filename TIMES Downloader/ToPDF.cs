@@ -56,7 +56,8 @@ namespace TIMES_Downloader
         private void Start_Click(object sender, EventArgs e)
         {
             Start.Enabled = false;
-            killThread = false;
+			btnStop.Enabled = true;
+			killThread = false;
             string saveLocation = this.saveLocation + "\\download\\";
             string[] courses = Directory.GetDirectories(saveLocation);
             int courseCount = courses.Length;
@@ -73,7 +74,7 @@ namespace TIMES_Downloader
             {
                 if (killThread)
                     return;
-                foreach (var course in courses) //This assumes that the folder structure is normal to TIMES. TOxDO: Stop assuming stuff. (DONE)
+                foreach (var course in courses)
                 {
                     if (killThread)
                         continue;
@@ -141,7 +142,7 @@ namespace TIMES_Downloader
             }
 
             Start.Enabled = true;
-            button1.Enabled = false;
+            btnStop.Enabled = false;
             label1.Text = "Completed";
             label2.Text = "";
             progressBar1.Value = 100;
