@@ -78,7 +78,7 @@ namespace TIMES_Downloader
                 {
                     if (killThread)
                         continue;
-                    if (Directory.Exists(course + pdfFolder))
+                    if (Directory.Exists(course + pdfFolder)) //TODO: just convert files that weren't converted before.
                     {
                         MessageBox.Show("A pdf folder already exists in the course. Please delete it if you would like to regenerate pdf's : " + course + pdfFolder);
                         MainForm.error += "Can't convert course - pdf folder already exists: " + course + "\r\n";
@@ -94,7 +94,7 @@ namespace TIMES_Downloader
                         string fileName = Path.GetFileNameWithoutExtension(file);
                         string fileExt = Path.GetExtension(file);
                         string path = Path.GetDirectoryName(file);
-                        string newPath = course + path.Replace(course, pdfFolder); //just adding pdf after the course folder. Have to do it each time so even if the files are inside nested directories, the structure won't be changed
+                        string newPath = course + path.Replace(course, pdfFolder); //just adding pdf folder name after the course folder. Have to do it each time so even if the files are inside nested directories, the structure won't be changed
 
                         SetLabelText(String.Format("Convert File {0} out of {1} : {2}", fileCount, documentCount, fileName), "");
                         if (!Directory.Exists(newPath))

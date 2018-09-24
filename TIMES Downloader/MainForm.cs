@@ -591,11 +591,11 @@ namespace TIMES_Downloader
                 wc.DownloadFile(item.url, tmpFile);
 
                 string header = wc.ResponseHeaders["Content-Disposition"] ?? string.Empty;
-                const string filename = "filename=";
-                int index = header.LastIndexOf(filename, StringComparison.OrdinalIgnoreCase);
+                const string constFilename = "filename=";
+                int index = header.LastIndexOf(constFilename, StringComparison.OrdinalIgnoreCase);
                 if (index > -1)
                 {
-                    fileName = header.Substring(index + filename.Length);
+                    fileName = header.Substring(index + constFilename.Length);
                     fileName = fileName.Replace('"', ' ').Trim();
                     tempNameHolder = fileName;
                 }
@@ -613,6 +613,8 @@ namespace TIMES_Downloader
                 //MessageBox.Show(path + fileName);
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
+
+				CheckFileName(path, ref fileName);
 
                 File.Move(tmpFile, path + fileName);
                 return true;
@@ -634,5 +636,20 @@ namespace TIMES_Downloader
             return filename;
         }
 
+		/**
+		 * Check if file exists and if it exists, add a number to the file. 
+		 */
+		private void CheckFileName(string path, ref string fileName)
+		{
+			int i = 0;
+			string name = Path.GetFileNameWithoutExtension(path + fileName);
+			string ext = Path.GetExtension(path + fileName);
+
+			while (File.Exists(path + fileName)) //if file doesn't exist, then no need to modify the fileName
+			{
+				i++;
+				fileName = name + " - " + i.ToString() + ext;
+			}
+		}
 	}
 }

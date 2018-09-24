@@ -83,6 +83,7 @@ namespace TIMES_Downloader
 			this.password.AccessibleDescription = "Taylor\'s Student ID";
 			this.password.Location = new System.Drawing.Point(242, 11);
 			this.password.Name = "password";
+			this.password.PasswordChar = '*';
 			this.password.Size = new System.Drawing.Size(216, 20);
 			this.password.TabIndex = 11;
 			this.password.Text = "password";
@@ -169,7 +170,7 @@ namespace TIMES_Downloader
 			this.panel1.Enabled = false;
 			this.panel1.Location = new System.Drawing.Point(20, 313);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(555, 179);
+			this.panel1.Size = new System.Drawing.Size(555, 164);
 			this.panel1.TabIndex = 0;
 			// 
 			// webBrowser1
@@ -180,7 +181,7 @@ namespace TIMES_Downloader
 			this.webBrowser1.Location = new System.Drawing.Point(7, 8);
 			this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
 			this.webBrowser1.Name = "webBrowser1";
-			this.webBrowser1.Size = new System.Drawing.Size(540, 163);
+			this.webBrowser1.Size = new System.Drawing.Size(540, 148);
 			this.webBrowser1.TabIndex = 0;
 			this.webBrowser1.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser1_DocumentCompleted);
 			// 
@@ -207,7 +208,7 @@ namespace TIMES_Downloader
 			// LinkLabel1
 			// 
 			this.LinkLabel1.AutoSize = true;
-			this.LinkLabel1.Location = new System.Drawing.Point(469, 495);
+			this.LinkLabel1.Location = new System.Drawing.Point(452, 488);
 			this.LinkLabel1.Name = "LinkLabel1";
 			this.LinkLabel1.Size = new System.Drawing.Size(146, 13);
 			this.LinkLabel1.TabIndex = 12;
@@ -252,7 +253,7 @@ namespace TIMES_Downloader
 			// 
 			// btnLicense
 			// 
-			this.btnLicense.Location = new System.Drawing.Point(242, 495);
+			this.btnLicense.Location = new System.Drawing.Point(254, 483);
 			this.btnLicense.Name = "btnLicense";
 			this.btnLicense.Size = new System.Drawing.Size(75, 23);
 			this.btnLicense.TabIndex = 20;
@@ -293,7 +294,7 @@ namespace TIMES_Downloader
 			// Label1
 			// 
 			this.Label1.AutoSize = true;
-			this.Label1.Location = new System.Drawing.Point(2, 495);
+			this.Label1.Location = new System.Drawing.Point(12, 488);
 			this.Label1.Name = "Label1";
 			this.Label1.Size = new System.Drawing.Size(105, 13);
 			this.Label1.TabIndex = 11;
