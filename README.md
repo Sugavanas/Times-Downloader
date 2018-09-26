@@ -1,5 +1,9 @@
+
 # Times-Downloader
 
+### Download V1.1  [HERE](https://github.com/Sugavanas/Times-Downloader/releases/download/1.1/Times.Downloader.1.1.zip)
+
+### Instructions
 A downloader that downloads all files from a specific course TIMES portal. 
 
 1. Run the program. Enter your user id and password. Click Login. 
