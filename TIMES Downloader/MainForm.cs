@@ -428,6 +428,8 @@ namespace TIMES_Downloader
 					tw.WriteLine(s);
 			}
 
+			File.Delete(saveLoc.Text + "/temp.html");
+
 			toolStripProgressBar1.Value = 0;
             toolStripLabel1.Text = "Completed. Saved to: " +  saveLocation + "\\download\\" + folderName;
             return true;
@@ -562,6 +564,8 @@ namespace TIMES_Downloader
 				foreach (String s in newHistory)
 					tw.WriteLine(s);
 			}
+
+			File.Delete(saveLoc.Text + "/temp.html");
 
 			return true;
 		}
