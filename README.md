@@ -1,7 +1,9 @@
 
 # Times-Downloader
 
-### Download V1.1  [HERE](https://github.com/Sugavanas/Times-Downloader/releases/download/1.1/Times.Downloader.1.1.zip)
+### Download V1.1.1  [HERE](https://github.com/Sugavanas/Times-Downloader/releases/download/1.1.1/Times.Downloader.1.1.1.zip)
+
+![times downloader](https://i.gyazo.com/eb1de71e2acbb37920757ca58dd71e05.png)
 
 ### Instructions
 A downloader that downloads all files from a specific course TIMES portal. 
@@ -19,6 +21,4 @@ The ToPDF function isn't really stable and it could possibly mess with all the f
 
 1. Click ToPDF button.
 2. Click Convert.
-
-
 
