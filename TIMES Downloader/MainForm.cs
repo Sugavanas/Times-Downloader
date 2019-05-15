@@ -352,42 +352,49 @@ namespace TIMES_Downloader
                 MessageBox.Show("Can't download course that was already downloaded. Please delete the old folder to redownload again or choose a different location. " + saveLocation + "\\download\\" + folderName);
                 return false;
             }
-           
-            if(doc.DocumentNode.SelectNodes("//ul[@class='topics']") == null)
-            {
-                MessageBox.Show("Course type not supported.");
-                return false;
-            }
-            foreach (var div in doc.DocumentNode.SelectNodes("//ul[@class='topics']"))
-            {
-                foreach (var section in div.Elements("li"))
-                {
-                    foreach (var itemLi in section.Descendants("li"))
-                    {
-                        foreach (var itemLink in itemLi.Descendants("a"))
-                        {
-                            if (!itemLink.GetAttributeValue("href", "nolink").Contains("resource/view.php?id"))
-                            {
-                                error += "Skipping Link: " + itemLink.GetAttributeValue("href", "nolink") + "\r\n";
-                                continue;
-                            }
 
-                            if (itemLink.Element("span").HasClass("instancename"))
-                            {
-                                downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
-                                RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
-							
+			if (doc.DocumentNode.SelectNodes("//div[@class='course-content']") != null) {
+
+				foreach (var div in doc.DocumentNode.SelectNodes("//div[@class='course-content']"))
+				{
+					foreach (var ul in div.Elements("ul"))
+					{
+						foreach (var section in ul.Elements("li"))
+						{
+							foreach (var itemLi in section.Descendants("li"))
+							{
+								foreach (var itemLink in itemLi.Descendants("a"))
+								{
+									if (!itemLink.GetAttributeValue("href", "nolink").Contains("resource/view.php?id"))
+									{
+										error += "Skipping Link: " + itemLink.GetAttributeValue("href", "nolink") + "\r\n";
+										continue;
+									}
+
+									if (itemLink.Element("span").HasClass("instancename"))
+									{
+										downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
+										RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
+									}
+
+								}
 							}
-
-                        }
-                    }
-                }
-            }
+						}
+					}
+				}
+			} else {
+				MessageBox.Show("Course type not supported.");
+				return false;
+			}
+            
 
             if (downloadItems.Count < 1)
-                return false;
+			{
+				MessageBox.Show("Course type not supported.");
+				return false;
+			}
 
-            toolStripProgressBar1.Value = 35;
+			toolStripProgressBar1.Value = 35;
             toolStripLabel1.Text = "All links fetched... Now downloading... This may take a while...";
 
             var incrementProgress = 65 / downloadItems.Count;
@@ -463,36 +470,42 @@ namespace TIMES_Downloader
 				//folderName = div.InnerText.Trim(); //TODO change folder name if the course name has changed.
 			}
 
-			if (doc.DocumentNode.SelectNodes("//ul[@class='topics']") == null)
+			if (doc.DocumentNode.SelectNodes("//div[@class='course-content']") != null)
+			{
+				foreach (var div in doc.DocumentNode.SelectNodes("//div[@class='course-content']"))
+				{
+					foreach (var ul in div.Elements("ul"))
+					{
+						foreach (var section in ul.Elements("li"))
+						{
+							foreach (var itemLi in section.Descendants("li"))
+							{
+								foreach (var itemLink in itemLi.Descendants("a"))
+								{
+									if (!itemLink.GetAttributeValue("href", "nolink").Contains("resource/view.php?id"))
+									{
+										error += "Skipping Link: " + itemLink.GetAttributeValue("href", "nolink") + "\r\n";
+										continue;
+									}
+
+									if (itemLink.Element("span").HasClass("instancename"))
+									{
+										downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
+										RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
+									}
+
+								}
+							}
+						}
+					}
+				}
+			}
+			else
 			{
 				error += "Course not supported anymore. " + URL + " \r\n";
 				return false;
 			}
 
-			foreach (var div in doc.DocumentNode.SelectNodes("//ul[@class='topics']"))
-			{
-				foreach (var section in div.Elements("li"))
-				{
-					foreach (var itemLi in section.Descendants("li"))
-					{
-						foreach (var itemLink in itemLi.Descendants("a"))
-						{
-							if (!itemLink.GetAttributeValue("href", "nolink").Contains("resource/view.php?id"))
-							{
-								error += "Skipping Link: " + itemLink.GetAttributeValue("href", "nolink") + "\r\n";
-								continue;
-							}
-
-							if (itemLink.Element("span").HasClass("instancename"))
-							{
-								downloadItems.Add(new DownloadItem(itemLink.Element("span").InnerText, section.GetAttributeValue("aria-label", "all"), itemLink.GetAttributeValue("href", "nolink"))); //null changed to nolink
-								RichTextBox1.AppendText("Found file: " + itemLink.Element("span").InnerText + " \r\n");
-							}
-
-						}
-					}
-				}
-			}
 
 			if (downloadItems.Count < 1)
 				return false;
